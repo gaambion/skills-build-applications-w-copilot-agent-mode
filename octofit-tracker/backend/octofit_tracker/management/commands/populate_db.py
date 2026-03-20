@@ -6,6 +6,9 @@ from ...models import User, Team, Activity, Leaderboard, Workout
 
 
 class Command(BaseCommand):
+    """
+    Populate the octofit_db database with test data for Teams, Users, Activities, Workouts, and Leaderboard.
+    """
     help = "Populate database with sample Octofit Tracker test data"
 
     @transaction.atomic
