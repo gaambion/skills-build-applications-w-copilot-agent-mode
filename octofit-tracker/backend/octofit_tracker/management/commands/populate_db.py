@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from datetime import date, timedelta
 
-from octofit_tracker.models import User, Team, Activity, Leaderboard, Workout
+from ...models import User, Team, Activity, Leaderboard, Workout
 
 
 class Command(BaseCommand):
@@ -18,12 +18,11 @@ class Command(BaseCommand):
         Team.objects.all().delete()
 
         self.stdout.write("Creating teams...")
-        teams = [
-            Team.objects.create(name="Team A", members=[]),
-            Team.objects.create(name="Team B", members=[]),
-            Team.objects.create(name="Team C", members=[]),
-            Team.objects.create(name="Team D", members=[]),
-        ]
+        team_names = ["Team A", "Team B", "Team C", "Team D"]
+        teams = {}
+        for team_name in team_names:
+            team, _ = Team.objects.get_or_create(name=team_name, defaults={'members': []})
+            teams[team_name] = team
 
         self.stdout.write("Creating users and assigning teams...")
         users = [
@@ -39,9 +38,13 @@ class Command(BaseCommand):
 
         for email, name, team_name in users:
             User.objects.create(email=email, name=name, team=team_name)
-            team = Team.objects.get(name=team_name)
-            team.members.append(name)
-            team.save()
+            team = teams.get(team_name) or Team.objects.filter(name=team_name).first()
+            if team is None:
+                self.stderr.write(self.style.WARNING(f"Team not found: {team_name}"))
+                continue
+            if name not in team.members:
+                team.members.append(name)
+                team.save()
 
         self.stdout.write("Creating workouts...")
         workouts = [

@@ -89,10 +89,8 @@ DATABASES = {
         'CLIENT': {
             'host': 'localhost',
             'port': 27017,
-            'username': '',
-            'password': '',
-            'authSource': '',
-            'authMechanism': '',
+            # Leave auth params out for local unauthenticated MongoDB.
+            # Add username/password/authSource/authMechanism for secure clusters.
         }
     }
 }
